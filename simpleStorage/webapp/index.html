@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Storage</title>
+</head>
+<body>
+    <h1>SimpleStorage</h1>
+    <button id="connectButton">Connect MetaMask</button>
+    <div id="status"></div>
+    
+    <h2>Get Data</h2>
+    <button id="getDataButton">Get Data</button>
+    <p>Data: <span id="data"></span></p>
+
+    <h2>Set Data</h2>
+    <input type="number" id="inputData" placeholder="input data">
+    <button id="setDataButton">Set Data</button>
+
+    <script type="module">
+        import { ethers } from "./ethers.min.js";
+        const contractAddress = "";
+        const contractABI = [];
+
+        let provider, signer, contract;
+
+        // 連接MetaMask
+        document.getElementById("connectButton").onclick = async () => {
+            if (typeof window.ethereum !== "undefined") {
+                try {
+                    document.getElementById("status").innerText = "MetaMask connected";
+                    provider = new ethers.BrowserProvider(window.ethereum)
+                    await provider.send("eth_requestAccounts", []);
+                    signer = await provider.getSigner();
+                    contract = new ethers.Contract(contractAddress, contractABI, signer);
+                } catch (error) {
+                    console.error("Failed to connect MetaMask", error);
+                    document.getElementById("status").innerText = "Failed to connect MetaMask";
+                }
+            } else {
+                alert("Install MetaMask first");
+            }
+        };
+
+        // 取得資料
+        document.getElementById("getDataButton").onclick = async () => {
+            if (contract) {
+                try {
+                    const readContract = contract.connect(provider);
+                    const data = await readContract.get();
+                    document.getElementById("data").innerText = data.toString();
+                } catch (error) {
+                    console.error("Failed to get data", error);
+                }
+            } else {
+                alert("Connect MetaMask first");
+            }
+        };
+
+        // 設定資料
+        document.getElementById("setDataButton").onclick = async () => {
+            if (contract) {
+                const inputData = document.getElementById("inputData").value;
+                if (inputData) {
+                    try {
+                        const tx = await contract.set(inputData);
+                        await tx.wait();
+                        alert("Data set successfully");
+                    } catch (error) {
+                        console.error("Failed to set data", error);
+                    }
+                } else {
+                    alert("Please input data");
+                }
+            } else {
+                alert("Connect MetaMask first");
+            }
+        };
+    </script>
+</body>
+</html>

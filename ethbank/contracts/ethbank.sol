@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+event Deposit(address indexed account, uint256 amount);
+
 contract EthBank {
     mapping(address => uint256) private balances;
 
     function deposit() public payable {
         require(msg.value > 0, "Deposit amount must be greater than zero");
         balances[msg.sender] += msg.value;
+        emit Deposit(msg.sender, msg.value);
     }
 
     function withdraw(uint amount) public {
